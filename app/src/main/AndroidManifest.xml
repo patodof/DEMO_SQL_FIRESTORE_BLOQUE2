@@ -13,6 +13,9 @@
         android:theme="@style/Theme.DEMOSQL"
         tools:targetApi="31">
         <activity
+            android:name=".DetalleActivity"
+            android:exported="false" />
+        <activity
             android:name=".AgregarActivity"
             android:exported="false" />
         <activity
