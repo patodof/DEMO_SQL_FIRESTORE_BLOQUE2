@@ -1,9 +1,13 @@
 package com.example.demosql;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +35,7 @@ public class DetalleActivity extends AppCompatActivity {
         db.execSQL("CREATE TABLE IF NOT EXISTS ESTUDIANTES (ID INTEGER PRIMARY KEY AUTOINCREMENT,NOMBRE VARCHAR,APELLIDOS VARCHAR,EDAD INTEGER)");
 
         //2.- OBTENER DATOS DESDE INTENT
-        String ID_ELEMENTO = getIntent().getStringExtra("ID");
+        int ID_ELEMENTO = getIntent().getIntExtra("ID", 0);
 
         //3 Hacer consulta SQL
         final Cursor cursor_detalle = db.rawQuery("select * from ESTUDIANTES WHERE ID="+ID_ELEMENTO,null);
@@ -56,19 +60,48 @@ public class DetalleActivity extends AppCompatActivity {
             objeto_estudiante.EDAD = cursor_detalle.getInt(INDICE_EDAD);
         }
 
+        //7 Cargar informacion a UI
+        //cajas de texto
+        TextView detalle_id = findViewById(R.id.detalle_id);
+        TextView detalle_nombre = findViewById(R.id.detalle_nombre);
+        TextView detalle_apellido = findViewById(R.id.detalle_apellido);
+        TextView detalle_edad = findViewById(R.id.detalle_edad);
 
+        //botones
+        Button boton_volver = findViewById(R.id.boton_detalle);
+        Button boton_editar = findViewById(R.id.boton_editar);
+        Button boton_eliminar = findViewById(R.id.boton_eliminar);
 
+        //cargar informacion a cajas de texto
+        detalle_id.setText("ID : "+objeto_estudiante.ID);
+        detalle_nombre.setText("NOMBRE : "+objeto_estudiante.NOMBRE);
+        detalle_apellido.setText("APELLIDOS : "+objeto_estudiante.APELLIDOS);
+        detalle_edad.setText("EDAD : "+objeto_estudiante.EDAD);
 
+        //Clicks de los botones
+        boton_volver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent_listar = new Intent(DetalleActivity.this, MainActivity.class);
+                startActivity(intent_listar);
+            }
+        });
 
+        boton_editar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent_editar = new Intent(DetalleActivity.this, EditarActivity.class );
+                intent_editar.putExtra("ID", ID_ELEMENTO );
+                startActivity(intent_editar);
+            }
+        });
 
-
-
-
-
-
-
-
-
+        boton_eliminar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //PROGRAMAR CODIGO PARA ELIMINAR ELEMENTO DE LA BASE DE DATOS
+            }
+        });
 
 
     }
