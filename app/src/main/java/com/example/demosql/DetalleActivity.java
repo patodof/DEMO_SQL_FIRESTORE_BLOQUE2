@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -99,7 +100,17 @@ public class DetalleActivity extends AppCompatActivity {
         boton_eliminar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //PROGRAMAR CODIGO PARA ELIMINAR ELEMENTO DE LA BASE DE DATOS
+                //Crear sql para eliminar
+                String sql = "DELETE FROM ESTUDIANTES WHERE ID=?";
+
+                //preparar consulta sql(stament)
+                SQLiteStatement statement = db.compileStatement(sql);
+                statement.bindString(1, String.valueOf(ID_ELEMENTO));
+                statement.execute();
+
+                //Redireccionar a Listar
+                Intent  intent = new Intent(DetalleActivity.this , MainActivity.class);
+                startActivity(intent);
             }
         });
 

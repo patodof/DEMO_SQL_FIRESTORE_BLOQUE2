@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,7 +35,7 @@ public class AgregarActivity extends AppCompatActivity {
         db.execSQL("CREATE TABLE IF NOT EXISTS ESTUDIANTES (ID INTEGER PRIMARY KEY AUTOINCREMENT,NOMBRE VARCHAR,APELLIDOS VARCHAR,EDAD INTEGER)");
 
         //2.- Asociar Boton
-        Button boton_agregar = findViewById(R.id.boton_agregar);
+        Button boton_agregar = findViewById(R.id.boton_editar);
 
         boton_agregar.setOnClickListener(new View.OnClickListener() {
             @Override

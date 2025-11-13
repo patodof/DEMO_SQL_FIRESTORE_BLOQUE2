@@ -6,12 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +18,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -74,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         listViewDatos.setAdapter(adapter);
 
         //boton agregar
-        Button boton_agregar = findViewById(R.id.boton_agregar);
+        Button boton_agregar = findViewById(R.id.boton_editar);
         boton_agregar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
