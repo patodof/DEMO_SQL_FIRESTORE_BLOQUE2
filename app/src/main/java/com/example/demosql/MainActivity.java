@@ -12,10 +12,17 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -32,43 +39,48 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        //CODIGO PARA CONECTARNOS A NUESTRA BD
-        SQLiteDatabase db = openOrCreateDatabase("BD_ESTUDIANTES", Context.MODE_PRIVATE,null);
-
-        //1.- CREAR TABLA
-        db.execSQL("CREATE TABLE IF NOT EXISTS ESTUDIANTES (ID INTEGER PRIMARY KEY AUTOINCREMENT,NOMBRE VARCHAR,APELLIDOS VARCHAR,EDAD INTEGER)");
-
-        //2.- LEER LA TABLA Y CARGAR A LISTVIEW
-        final Cursor cursor_listar = db.rawQuery("select * from ESTUDIANTES",null);
-
-        //3.- Ubicar nuestras columnas
-        int ID = cursor_listar.getColumnIndex("ID");
-        int NOMBRE = cursor_listar.getColumnIndex("NOMBRE");
-        int APELLIDOS = cursor_listar.getColumnIndex("APELLIDOS");
-
-        //4.- RECORRER SELECT
         ArrayList<Estudiante> lista_estudiantes = new ArrayList<Estudiante>();
         ArrayList<String> arreglo = new ArrayList<>();
-
-        while( cursor_listar.moveToNext() )
-        {
-            Estudiante obj = new Estudiante();
-            obj.ID = cursor_listar.getInt(ID);
-            obj.NOMBRE = cursor_listar.getString(NOMBRE);
-            obj.APELLIDOS = cursor_listar.getString(APELLIDOS);
-
-            lista_estudiantes.add(obj);
-
-            //agregar a lista para ArrayAdapter
-            arreglo.add("# "+obj.ID+" "+obj.NOMBRE+" "+obj.APELLIDOS);
-        }
-
-        //5.- Cargar informacion a ListView
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1 ,arreglo);
-
-        //6.- Declarar ListView
         ListView listViewDatos = findViewById(R.id.lista_estudiantes);
-        listViewDatos.setAdapter(adapter);
+
+        FirebaseFirestore db_firebase = FirebaseFirestore.getInstance();
+
+        //Obtener datos desde Firebase
+        db_firebase.collection("estudiantes").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful() )
+                {
+                    //LLAMADA COMPLETA A FIREBASE
+                    //iterar resultados obtenidos
+                    for(QueryDocumentSnapshot documento :  task.getResult() )
+                    {
+                        //poblar objetos
+                        Estudiante obj = new Estudiante();
+                        obj.ID = documento.getString("ID");
+                        obj.NOMBRE = documento.getString("NOMBRE");
+                        obj.APELLIDOS = documento.getString("APELLIDOS");
+                        obj.EDAD = documento.getLong("EDAD").intValue();
+
+                        lista_estudiantes.add(obj);
+
+                        //agregar a lista para ArrayAdapter
+                        arreglo.add("# "+obj.ID+" "+obj.NOMBRE+" "+obj.APELLIDOS);
+                    }
+
+                    //agregar informacion al adapter
+                    //5.- Cargar informacion a ListView
+                    ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1 ,arreglo);
+
+                    //6.- Declarar ListView
+                    listViewDatos.setAdapter(adapter);
+                }
+                else
+                {
+                    //ERROR CON FIREBASE
+                }
+            }
+        });
 
         //boton agregar
         Button boton_agregar = findViewById(R.id.boton_editar);

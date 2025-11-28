@@ -11,10 +11,16 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class DetalleActivity extends AppCompatActivity {
 
@@ -28,7 +34,85 @@ public class DetalleActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        //Obtener ID de Intent
+        String ID_ELEMENTO = getIntent().getStringExtra("ID");
+        Estudiante objeto_estudiante = new Estudiante();
 
+        //Conenctarnos a Firebase
+        FirebaseFirestore db_firebase = FirebaseFirestore.getInstance();
+
+        //Obtener solo el objeto con el ID que necesitamos
+        db_firebase.collection("estudiantes").document(ID_ELEMENTO).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful())
+                {
+                    //todo ok con firebase
+                    DocumentSnapshot documento = task.getResult();
+                    //obtenemos la informacion a nuestro objeto estudiante
+                    objeto_estudiante.ID = documento.getString("ID");
+                    objeto_estudiante.NOMBRE = documento.getString("NOMBRE");
+                    objeto_estudiante.APELLIDOS = documento.getString("APELLIDOS");
+                    objeto_estudiante.EDAD = documento.getLong("EDAD").intValue();
+
+                    //7 Cargar informacion a UI
+                    //cajas de texto
+                    TextView detalle_id = findViewById(R.id.detalle_id);
+                    TextView detalle_nombre = findViewById(R.id.detalle_nombre);
+                    TextView detalle_apellido = findViewById(R.id.detalle_apellido);
+                    TextView detalle_edad = findViewById(R.id.detalle_edad);
+
+                    //botones
+                    Button boton_volver = findViewById(R.id.boton_detalle);
+                    Button boton_editar = findViewById(R.id.boton_editar);
+                    Button boton_eliminar = findViewById(R.id.boton_eliminar);
+
+                    //cargar informacion a cajas de texto
+                    detalle_id.setText("ID : "+objeto_estudiante.ID);
+                    detalle_nombre.setText("NOMBRE : "+objeto_estudiante.NOMBRE);
+                    detalle_apellido.setText("APELLIDOS : "+objeto_estudiante.APELLIDOS);
+                    detalle_edad.setText("EDAD : "+objeto_estudiante.EDAD);
+
+                    //Clicks de los botones
+                    boton_volver.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent_listar = new Intent(DetalleActivity.this, MainActivity.class);
+                            startActivity(intent_listar);
+                        }
+                    });
+
+                    boton_editar.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent_editar = new Intent(DetalleActivity.this, EditarActivity.class );
+                            intent_editar.putExtra("ID", ID_ELEMENTO );
+                            startActivity(intent_editar);
+                        }
+                    });
+
+                    boton_eliminar.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            //eliminar objeto en firebase
+                            FirebaseFirestore db_firebase = FirebaseFirestore.getInstance();
+
+                            db_firebase.collection("estudiantes").document(ID_ELEMENTO).delete();
+
+                            //Redireccionar a Listar
+                            Intent  intent = new Intent(DetalleActivity.this , MainActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+                }
+                else
+                {
+                    //error conexion a firebase
+                }
+            }
+        });
+        /*
         //CODIGO PARA CONECTARNOS A NUESTRA BD
         SQLiteDatabase db = openOrCreateDatabase("BD_ESTUDIANTES", Context.MODE_PRIVATE,null);
 
@@ -36,7 +120,7 @@ public class DetalleActivity extends AppCompatActivity {
         db.execSQL("CREATE TABLE IF NOT EXISTS ESTUDIANTES (ID INTEGER PRIMARY KEY AUTOINCREMENT,NOMBRE VARCHAR,APELLIDOS VARCHAR,EDAD INTEGER)");
 
         //2.- OBTENER DATOS DESDE INTENT
-        int ID_ELEMENTO = getIntent().getIntExtra("ID", 0);
+
 
         //3 Hacer consulta SQL
         final Cursor cursor_detalle = db.rawQuery("select * from ESTUDIANTES WHERE ID="+ID_ELEMENTO,null);
@@ -55,64 +139,14 @@ public class DetalleActivity extends AppCompatActivity {
         {
             //Poblamos nuestro objeto con la informacion de la base de datos
             //los metodos getInt y getString reciben un int que representa al indice obtenido en el paso 5
-            objeto_estudiante.ID = cursor_detalle.getInt(INDICE_ID);
+            objeto_estudiante.ID = cursor_detalle.getString(INDICE_ID);
             objeto_estudiante.NOMBRE = cursor_detalle.getString(INDICE_NOMBRE);
             objeto_estudiante.APELLIDOS = cursor_detalle.getString(INDICE_APELLIDO);
             objeto_estudiante.EDAD = cursor_detalle.getInt(INDICE_EDAD);
         }
 
-        //7 Cargar informacion a UI
-        //cajas de texto
-        TextView detalle_id = findViewById(R.id.detalle_id);
-        TextView detalle_nombre = findViewById(R.id.detalle_nombre);
-        TextView detalle_apellido = findViewById(R.id.detalle_apellido);
-        TextView detalle_edad = findViewById(R.id.detalle_edad);
+         */
 
-        //botones
-        Button boton_volver = findViewById(R.id.boton_detalle);
-        Button boton_editar = findViewById(R.id.boton_editar);
-        Button boton_eliminar = findViewById(R.id.boton_eliminar);
-
-        //cargar informacion a cajas de texto
-        detalle_id.setText("ID : "+objeto_estudiante.ID);
-        detalle_nombre.setText("NOMBRE : "+objeto_estudiante.NOMBRE);
-        detalle_apellido.setText("APELLIDOS : "+objeto_estudiante.APELLIDOS);
-        detalle_edad.setText("EDAD : "+objeto_estudiante.EDAD);
-
-        //Clicks de los botones
-        boton_volver.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent_listar = new Intent(DetalleActivity.this, MainActivity.class);
-                startActivity(intent_listar);
-            }
-        });
-
-        boton_editar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent_editar = new Intent(DetalleActivity.this, EditarActivity.class );
-                intent_editar.putExtra("ID", ID_ELEMENTO );
-                startActivity(intent_editar);
-            }
-        });
-
-        boton_eliminar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Crear sql para eliminar
-                String sql = "DELETE FROM ESTUDIANTES WHERE ID=?";
-
-                //preparar consulta sql(stament)
-                SQLiteStatement statement = db.compileStatement(sql);
-                statement.bindString(1, String.valueOf(ID_ELEMENTO));
-                statement.execute();
-
-                //Redireccionar a Listar
-                Intent  intent = new Intent(DetalleActivity.this , MainActivity.class);
-                startActivity(intent);
-            }
-        });
 
 
     }
